@@ -19,21 +19,21 @@ jobs:
         with:
           dotnet-version: '7.0.x'
 
+      - name: Restore and build .NET backend
+        run: |
+          dotnet restore ./api/Basic3TierAPI/Basic3TierAPI.csproj
+          dotnet build ./api/Basic3TierAPI/Basic3TierAPI.csproj --no-restore --configuration Release
+
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Restore & build backend
-        run: |
-          dotnet restore ./Basic3TierAPI/Basic3TierAPI.csproj
-          dotnet build ./Basic3TierAPI/Basic3TierAPI.csproj --no-restore --configuration Release
-
       - name: Build Docker images
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend3tier:v.1 ./api
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend3tier:v.1 ./ui
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend3tier:v.1 ./api
 
       - name: Push Docker images
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend3tier:v.1
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend3tier:v.1
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend3tier:v.1
 
