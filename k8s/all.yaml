@@ -1,13 +1,26 @@
 ---
-# PersistentVolumeClaim for Postgres data is defined via volumeClaimTemplates inside StatefulSet
+# 1) Postgres Headless Service (for StatefulSet DNS)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: 5432
 
-# StatefulSet for Postgres
+---
+# 2) Postgres StatefulSet + PVC
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
 spec:
-  serviceName: "postgres"
+  serviceName: postgres
   replicas: 1
   selector:
     matchLabels:
@@ -38,20 +51,21 @@ spec:
     - metadata:
         name: postgres-data
       spec:
-        accessModes: [ "ReadWriteOnce" ]
+        accessModes:
+          - ReadWriteOnce
         storageClassName: gp2
         resources:
           requests:
             storage: 5Gi
 
 ---
-# Backend Deployment
+# 3) Backend Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -70,7 +84,7 @@ spec:
               value: "Host=postgres;Port=5432;Database=basic3tier;Username=postgres;Password=admin123"
 
 ---
-# Backend Service
+# 4) Backend Service (ClusterIP)
 apiVersion: v1
 kind: Service
 metadata:
@@ -85,7 +99,7 @@ spec:
   type: ClusterIP
 
 ---
-# Frontend Deployment
+# 5) Frontend Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -110,7 +124,7 @@ spec:
               value: "http://backend-service:80"
 
 ---
-# Frontend Service (exposed externally)
+# 6) Frontend Service (LoadBalancer)
 apiVersion: v1
 kind: Service
 metadata:
