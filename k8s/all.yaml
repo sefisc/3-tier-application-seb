@@ -9,7 +9,7 @@ spec:
   selector:
     app: postgres
   ports:
-    - name: pg
+    - name: postgres
       port: 5432
       targetPort: 5432
 
@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: sfischer46/dbpostgres:v1
+          image: postgres:latest
           ports:
             - containerPort: 5432
           env:
@@ -76,7 +76,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: sfischer46/backend3tier:v1
+          image: sfischer46/backend3tier:v.1
           ports:
             - containerPort: 80
           env:
@@ -116,7 +116,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: sfischer46/frontend3tier:v1
+          image: sfischer46/frontend3tier:v.1
           ports:
             - containerPort: 80
           env:
