@@ -20,16 +20,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      - name: Set up kubectl
+      - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
 
       - name: Update kubeconfig for EKS cluster
         run: |
-          aws eks update-kubeconfig \
-            --region eu-central-1 \
-            --name my-eks-lab-sebi
+          aws eks update-kubeconfig --region eu-central-1 --name ${{ secrets.EKS_CLUSTER_NAME }}
 
       - name: Deploy to EKS
         run: |
