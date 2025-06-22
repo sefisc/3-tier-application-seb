@@ -36,7 +36,7 @@ jobs:
           cd api
           dotnet test --no-build --verbosity normal
 
-      # If you have frontend tests, add them here; otherwise skip this.
+      # Uncomment and configure if you have frontend tests
       # - name: Install Node & test UI
       #   uses: actions/setup-node@v3
       #   with: node-version: '18'
@@ -46,13 +46,12 @@ jobs:
       #     npm test
 
       - name: Security scan (Trivy)
-        uses: aquasecurity/trivy-action@v0.3.0
+        uses: aquasecurity/trivy-action@v0.11.0
         with:
           scan-type: filesystem
           scan-paths: |
             api
             ui
-        # will fail the step if any vulnerabilities of HIGH or CRITICAL are found
         env:
           TRIVY_SEVERITY: CRITICAL,HIGH
 
