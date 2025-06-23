@@ -1,5 +1,4 @@
----
-# 1) Postgres Headless Service (for StatefulSet DNS)
+# 1) Postgres Headless Service
 apiVersion: v1
 kind: Service
 metadata:
@@ -59,7 +58,7 @@ spec:
             storage: 5Gi
 
 ---
-# 3) Backend Deployment
+# 3) Backend Deployment (with initContainer and fixed env)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -74,17 +73,21 @@ spec:
       labels:
         app: backend
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox
+          command: ['sh', '-c', 'until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done;']
       containers:
         - name: backend
           image: sfischer46/backend3tier:v.1
           ports:
             - containerPort: 80
           env:
-            - name: ConnectionStrings__Basic3Tier
+            - name: ConnectionStrings__DefaultConnection
               value: "Host=postgres;Port=5432;Database=basic3tier;Username=postgres;Password=admin123"
 
 ---
-# 4) Backend Service (ClusterIP)
+# 4) Backend Service
 apiVersion: v1
 kind: Service
 metadata:
@@ -124,7 +127,7 @@ spec:
               value: "http://backend-service:80"
 
 ---
-# 6) Frontend Service (LoadBalancer)
+# 6) Frontend Service (ALB)
 apiVersion: v1
 kind: Service
 metadata:
